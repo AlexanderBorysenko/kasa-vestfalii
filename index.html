@@ -1,0 +1,619 @@
+<title>Каса Вестфалії</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --paper:#F1F5EF; --sheet:#FBFDFA; --bar:#E3ECE1; --raise:#FFFFFF;
+  --ink:#1B241F; --ink-2:#4A5A51; --ink-3:#7A8A80;
+  --rule:#C7D4C6; --rule-hard:#9FB2A0;
+  --red:#A8342A; --red-bg:#F6E4E1;
+  --green:#2C6B58; --green-bg:#DFEDE5;
+  --amber:#8A6410; --amber-bg:#F3E9D2;
+  --shadow:0 8px 30px -18px rgba(27,36,31,.55);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1411; --sheet:#151D19; --bar:#1B2521; --raise:#1F2A25;
+    --ink:#E7EEE8; --ink-2:#A9BBB0; --ink-3:#77897E;
+    --rule:#2A3831; --rule-hard:#3E5148;
+    --red:#E88073; --red-bg:#35201D;
+    --green:#69C4A5; --green-bg:#182C25;
+    --amber:#D6A73F; --amber-bg:#2E2616;
+    --shadow:0 10px 34px -18px #000;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1411; --sheet:#151D19; --bar:#1B2521; --raise:#1F2A25;
+  --ink:#E7EEE8; --ink-2:#A9BBB0; --ink-3:#77897E;
+  --rule:#2A3831; --rule-hard:#3E5148;
+  --red:#E88073; --red-bg:#35201D;
+  --green:#69C4A5; --green-bg:#182C25;
+  --amber:#D6A73F; --amber-bg:#2E2616;
+  --shadow:0 10px 34px -18px #000;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;
+  padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+button,input,select{font-family:inherit;font-size:inherit;color:inherit}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:500;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
+.wrap{max-width:720px;margin:0 auto;padding:0 14px}
+
+/* ---- header ---- */
+header{border-top:3px solid var(--ink);background:var(--paper);padding:12px 0 0}
+.hrow{display:flex;align-items:flex-start;gap:12px;justify-content:space-between}
+h1{font-family:Bitter,Georgia,serif;font-size:24px;font-weight:700;margin:4px 0 2px;letter-spacing:-.015em}
+.who-am-i{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-3);
+  font-family:"IBM Plex Mono",monospace}
+.who-am-i select{background:var(--sheet);border:1px solid var(--rule-hard);border-radius:3px;
+  padding:5px 7px;font-size:11px;font-family:"IBM Plex Mono",monospace}
+.status{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.08em;
+  text-transform:uppercase;padding:3px 7px;border-radius:3px;white-space:nowrap;margin-top:6px;display:inline-block}
+.status.local{background:var(--amber-bg);color:var(--amber)}
+.status.cloud{background:var(--green-bg);color:var(--green)}
+.status.err{background:var(--red-bg);color:var(--red)}
+.tabs{display:flex;gap:0;border-bottom:2px solid var(--ink);margin-top:14px}
+.tabs button{flex:1;background:transparent;border:0;border-bottom:2px solid transparent;
+  margin-bottom:-2px;padding:10px 6px;cursor:pointer;color:var(--ink-3);
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink);font-weight:600}
+
+/* ---- debts ---- */
+.summary{display:flex;gap:0;border-bottom:1px solid var(--rule-hard);margin:0 0 4px}
+.summary div{flex:1;min-width:0;padding:11px 8px 12px;border-right:1px solid var(--rule)}
+.summary div:last-child{border-right:0}
+.summary .v{font-family:Bitter,Georgia,serif;font-size:clamp(15px,4.5vw,21px);font-weight:600;
+  margin-top:5px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.summary .v.red{color:var(--red)}
+.acct{border-bottom:1px solid var(--rule);border-left:4px solid var(--rule-hard);
+  background:var(--sheet);padding:11px 12px 11px 11px}
+.acct.owing{border-left-color:var(--red)}
+.acct.creditor{border-left-color:var(--green)}
+.acct-top{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.acct-top .nm{font-family:Bitter,Georgia,serif;font-size:17px;font-weight:600}
+.acct-top .verdict{font-family:"IBM Plex Mono",monospace;font-size:11.5px;font-weight:600}
+.acct-top .verdict.r{color:var(--red)} .acct-top .verdict.g{color:var(--green)}
+.acct-top .verdict.n{color:var(--ink-3);font-weight:400}
+.pairs{list-style:none;margin:6px 0 0;padding:0}
+.pairs li{display:flex;align-items:baseline;gap:8px;padding:4px 0;
+  border-bottom:1px dotted var(--rule);font-size:13px;color:var(--ink-2)}
+.pairs li:last-child{border-bottom:0}
+.pairs li b{color:var(--ink);font-weight:600}
+.pairs li .amt{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-weight:600;white-space:nowrap}
+.pairs li.debit .amt{color:var(--red)} .pairs li.credit .amt{color:var(--green)}
+.pairs li.none{color:var(--ink-3)}
+
+/* ---- entries ---- */
+.group-h{display:flex;align-items:baseline;justify-content:space-between;
+  padding:16px 2px 6px;border-bottom:1px solid var(--rule-hard)}
+.group-h h2{font-family:Bitter,Georgia,serif;font-size:15px;font-weight:600;margin:0}
+.group-h span{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-3)}
+.ent{width:100%;text-align:left;display:flex;gap:11px;align-items:flex-start;
+  background:var(--sheet);border:0;border-bottom:1px solid var(--rule);
+  padding:12px 11px;cursor:pointer;min-height:56px}
+.ent:nth-child(even){background:var(--bar)}
+.ent:active{background:var(--raise)}
+.ent .body{flex:1;min-width:0}
+.ent .t{font-weight:600;font-size:14.5px;display:block;overflow:hidden;text-overflow:ellipsis}
+.ent .m{font-size:11.5px;color:var(--ink-3);font-family:"IBM Plex Mono",monospace;
+  margin-top:2px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ent .a{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:14px;white-space:nowrap;
+  text-align:right;padding-top:1px}
+.ent.is-plan .a{color:var(--amber)}
+.ent.is-tr .a{color:var(--green)}
+.ent .ic{width:26px;height:26px;border-radius:3px;display:grid;place-items:center;flex:none;
+  font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;
+  background:var(--red-bg);color:var(--red)}
+.ent.is-tr .ic{background:var(--green-bg);color:var(--green)}
+.ent.is-plan .ic{background:var(--amber-bg);color:var(--amber)}
+.empty{padding:26px 12px;text-align:center;color:var(--ink-3);font-size:13.5px}
+
+/* ---- fab bar ---- */
+.fab{position:fixed;left:0;right:0;bottom:0;z-index:40;
+  background:linear-gradient(to top,var(--paper) 62%,transparent);
+  padding:12px 14px calc(12px + env(safe-area-inset-bottom))}
+.fab .in{max-width:720px;margin:0 auto;display:flex;gap:9px}
+.fab button{flex:1;min-height:50px;border-radius:4px;cursor:pointer;font-weight:600;font-size:15px;
+  border:1px solid var(--ink);background:var(--ink);color:var(--paper);box-shadow:var(--shadow)}
+.fab button.alt{background:var(--sheet);color:var(--ink)}
+
+/* ---- modal ---- */
+.mask{position:fixed;inset:0;z-index:50;background:rgba(10,16,13,.5);
+  display:flex;align-items:flex-end;justify-content:center}
+.mask[hidden]{display:none}
+.modal{background:var(--paper);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;
+  border-radius:12px 12px 0 0;border-top:3px solid var(--ink);
+  padding:16px 16px calc(20px + env(safe-area-inset-bottom))}
+@media(min-width:600px){.mask{align-items:center}.modal{border-radius:6px;border:1px solid var(--rule-hard);border-top:3px solid var(--ink)}}
+.modal h3{font-family:Bitter,Georgia,serif;font-size:19px;margin:0 0 14px;font-weight:600}
+.fld{margin-bottom:15px}
+.fld>label{display:block;margin-bottom:6px}
+.amt-row{display:flex;gap:8px}
+.amt-row input{flex:1;min-width:0;font-family:"IBM Plex Mono",monospace;font-size:26px;font-weight:600;
+  padding:10px 12px;border:1px solid var(--rule-hard);border-radius:4px;background:var(--sheet);
+  min-height:54px}
+.cur{display:flex;border:1px solid var(--rule-hard);border-radius:4px;overflow:hidden;background:var(--sheet)}
+.cur button{width:52px;background:transparent;border:0;cursor:pointer;font-family:"IBM Plex Mono",monospace;
+  font-size:15px;color:var(--ink-3)}
+.cur button+button{border-left:1px solid var(--rule)}
+.cur button[aria-pressed="true"]{background:var(--ink);color:var(--paper);font-weight:600}
+input[type=text]{width:100%;padding:11px 12px;border:1px solid var(--rule-hard);border-radius:4px;
+  background:var(--sheet);min-height:46px}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--green);outline-offset:1px}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{border:1px solid var(--rule-hard);background:var(--sheet);border-radius:20px;
+  padding:8px 14px;cursor:pointer;font-size:13.5px;min-height:40px;color:var(--ink-2)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper);font-weight:600}
+.chip.tiny{padding:5px 10px;min-height:32px;font-size:12px;border-radius:14px}
+.split-hd{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:6px}
+.split-hd .per{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink-3)}
+.arrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.arrow .ar{color:var(--ink-3);font-family:"IBM Plex Mono",monospace}
+.mrow{display:flex;gap:9px;margin-top:18px}
+.mrow button{flex:1;min-height:50px;border-radius:4px;cursor:pointer;font-weight:600;
+  border:1px solid var(--ink);background:var(--ink);color:var(--paper)}
+.mrow button.ghost{background:transparent;color:var(--ink-2);border-color:var(--rule-hard);font-weight:400}
+.mrow button.danger{background:transparent;color:var(--red);border-color:var(--red);flex:0 0 auto;padding:0 16px}
+.err{color:var(--red);font-size:12.5px;margin-top:8px;min-height:1em}
+.hintline{font-size:11.5px;color:var(--ink-3);margin-top:5px}
+.foot{padding:22px 2px 8px;font-size:11px;color:var(--ink-3);
+  display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.setup{background:var(--sheet);border:1px solid var(--rule-hard);border-left:4px solid var(--amber);
+  padding:14px;margin-top:16px;font-size:13px;color:var(--ink-2)}
+.setup b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="hrow">
+    <div>
+      <div class="eyebrow">Албанія · 17–21 вересня 2026</div>
+      <h1>Каса Вестфалії</h1>
+      <span class="status" id="status">…</span>
+    </div>
+    <div class="who-am-i">
+      <span>я —</span>
+      <select id="me" aria-label="Хто я"></select>
+    </div>
+  </div>
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-debts" aria-selected="true">Борги</button>
+    <button role="tab" id="tab-log" aria-selected="false">Записи</button>
+  </div>
+</header>
+
+<main>
+  <section id="view-debts">
+    <div class="summary" id="summary"></div>
+    <div id="accounts"></div>
+  </section>
+  <section id="view-log" hidden>
+    <div id="log"></div>
+  </section>
+</main>
+
+<div class="foot">
+  <span id="rate-note"></span>
+  <span id="count-note"></span>
+</div>
+</div>
+
+<div class="fab"><div class="in">
+  <button type="button" id="add-exp">+ Витрата</button>
+  <button type="button" class="alt" id="add-tr">+ Переказ</button>
+</div></div>
+
+<div class="mask" id="mask" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-title">
+    <h3 id="m-title">Нова витрата</h3>
+
+    <div class="fld">
+      <label class="eyebrow">Сума</label>
+      <div class="amt-row">
+        <input id="f-amt" type="text" inputmode="decimal" placeholder="0" autocomplete="off">
+        <div class="cur">
+          <button type="button" id="f-uah" aria-pressed="true">грн</button>
+          <button type="button" id="f-eur" aria-pressed="false">€</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="fld" id="fld-title">
+      <label class="eyebrow" for="f-title">За що</label>
+      <input id="f-title" type="text" placeholder="пальне, вечеря, кемпінг…" autocomplete="off">
+      <div class="chips" style="margin-top:8px" id="quick"></div>
+    </div>
+
+    <div class="fld" id="fld-payer">
+      <label class="eyebrow">Хто заплатив</label>
+      <div class="chips" id="f-payer"></div>
+    </div>
+
+    <div class="fld" id="fld-tr">
+      <label class="eyebrow">Переказ</label>
+      <div class="arrow">
+        <div class="chips" id="f-from"></div>
+      </div>
+      <div class="hintline" style="margin:8px 0 6px">кому</div>
+      <div class="chips" id="f-to"></div>
+    </div>
+
+    <div class="fld" id="fld-split">
+      <div class="split-hd">
+        <label class="eyebrow">На кого ділиться</label>
+        <span class="per" id="per-head"></span>
+      </div>
+      <div class="chips" id="f-split"></div>
+      <div class="chips" style="margin-top:8px">
+        <button type="button" class="chip tiny" id="split-all">усі</button>
+        <button type="button" class="chip tiny" id="split-none">зняти всіх</button>
+      </div>
+    </div>
+
+    <div class="fld" id="fld-plan">
+      <div class="chips">
+        <button type="button" class="chip" id="f-planned" aria-pressed="false">Ще не сплачено (план)</button>
+      </div>
+    </div>
+
+    <div class="err" id="f-err"></div>
+    <div class="mrow">
+      <button type="button" class="ghost" id="m-cancel">Скасувати</button>
+      <button type="button" class="danger" id="m-del" hidden>Видалити</button>
+      <button type="button" id="m-save">Зберегти</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   НАЛАШТУВАННЯ БАЗИ
+   Тут навмисно PUBLISHABLE ключ — він поважає політики доступу
+   таблиці. SECRET ключ у цей файл класти НЕ МОЖНА за жодних умов:
+   він обходить усі політики, а цей файл віддається кожному відвідувачу.
+   ============================================================ */
+const SUPABASE_URL  = "https://vluflyggmmhdczqygbxh.supabase.co";
+const SUPABASE_ANON = "sb_publishable_O6OWIJe0kE9g05XUw3kA8Q_Bcj3O98z";
+
+const PEOPLE = ["Боря","Олеся","Настя","Джулі","Ліза"];
+const RATE   = 51.8;
+const QUICK  = ["Пальне","Продукти","Вечеря","Кемпінг","Паркінг","Пором","Вода/лід","Інше"];
+
+const SEED = [
+  {kind:"expense", title:"Кемпер — гарантійний внесок", payer:"Боря", amount:100,   currency:"EUR", split:PEOPLE},
+  {kind:"expense", title:"Готель у Варшаві",            payer:"Боря", amount:4000,  currency:"UAH", split:PEOPLE},
+  {kind:"expense", title:"Авіаквитки — рейс 1",         payer:"Боря", amount:18846, currency:"UAH", split:["Боря","Олеся","Ліза"]},
+  {kind:"expense", title:"Авіаквитки — рейс 2",         payer:"Боря", amount:11817, currency:"UAH", split:["Боря","Олеся","Ліза"]},
+  {kind:"expense", title:"Авіаквитки — Джулі",          payer:"Боря", amount:11295, currency:"UAH", split:["Джулі"]},
+  {kind:"expense", title:"Авіаквитки — Настя",          payer:"Боря", amount:13000, currency:"UAH", split:["Настя"]},
+  {kind:"expense", title:"Укрзалізниця — Олеся",        payer:"Боря", amount:3122,  currency:"UAH", split:["Олеся"]},
+  {kind:"transfer", payer:"Ліза",  recipient:"Боря", amount:7400,  currency:"UAH"},
+  {kind:"transfer", payer:"Ліза",  recipient:"Боря", amount:3821,  currency:"UAH"},
+  {kind:"transfer", payer:"Джулі", recipient:"Боря", amount:11300, currency:"UAH"},
+  {kind:"transfer", payer:"Джулі", recipient:"Боря", amount:1000,  currency:"UAH"},
+  {kind:"transfer", payer:"Олеся", recipient:"Боря", amount:10200, currency:"UAH"},
+  {kind:"transfer", payer:"Настя", recipient:"Боря", amount:9000,  currency:"UAH"},
+  {kind:"expense", title:"Доплата за кемпер", payer:"Боря", amount:340, currency:"EUR", split:PEOPLE, planned:true},
+  {kind:"expense", title:"Багаж у літак",     payer:"Боря", amount:85,  currency:"EUR", split:PEOPLE, planned:true}
+];
+
+const CLOUD = !SUPABASE_URL.startsWith("__");
+const SEED_AT = Date.parse("2026-09-09T12:00:00Z");
+const uah = e => e.currency === "EUR" ? e.amount * RATE : e.amount;
+const fmt = v => Math.round(v).toLocaleString("uk-UA").replace(/ /g," ") + " грн";
+const fmtE = e => e.currency === "EUR"
+  ? e.amount.toLocaleString("uk-UA",{maximumFractionDigits:2}) + " €"
+  : fmt(e.amount);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+const ls = {
+  get(k,d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(_){ return d; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(_){} }
+};
+
+/* ---------- storage ---------- */
+const H = {
+  "apikey": SUPABASE_ANON,
+  "Authorization": "Bearer " + SUPABASE_ANON,
+  "Content-Type": "application/json"
+};
+const cloud = {
+  async list(){
+    const r = await fetch(SUPABASE_URL + "/rest/v1/entries?select=*&order=created_at.asc", {headers:H});
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return (await r.json()).map(row => ({...row, split: row.split || []}));
+  },
+  async seed(){
+    const cur = await cloud.list();
+    if (cur.length) return cur;                      // хтось встиг залити раніше
+    const rows = SEED.map((e,i) => ({
+      created_at: new Date(SEED_AT + i*60000).toISOString(),
+      title:null, recipient:null, split:[], planned:false, ...e}));
+    const r = await fetch(SUPABASE_URL + "/rest/v1/entries", {
+      method:"POST", headers:{...H, Prefer:"return=representation"}, body: JSON.stringify(rows)});
+    if (!r.ok) throw new Error("HTTP " + r.status + " " + (await r.text()).slice(0,120));
+    return await cloud.list();
+  },
+  async insert(e){
+    const r = await fetch(SUPABASE_URL + "/rest/v1/entries", {
+      method:"POST", headers:{...H, Prefer:"return=representation"}, body: JSON.stringify(e)});
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return (await r.json())[0];
+  },
+  async patch(id, e){
+    const r = await fetch(SUPABASE_URL + "/rest/v1/entries?id=eq." + encodeURIComponent(id), {
+      method:"PATCH", headers:H, body: JSON.stringify(e)});
+    if (!r.ok) throw new Error("HTTP " + r.status);
+  },
+  async remove(id){
+    const r = await fetch(SUPABASE_URL + "/rest/v1/entries?id=eq." + encodeURIComponent(id), {
+      method:"DELETE", headers:H});
+    if (!r.ok) throw new Error("HTTP " + r.status);
+  }
+};
+const local = {
+  async list(){
+    let rows = ls.get("kasa.entries", null);
+    if (!rows){
+      rows = SEED.map((s,i) => ({id:uid(), created_at:new Date(Date.now()+i*1000).toISOString(),
+        planned:false, split:[], recipient:null, title:null, ...s}));
+      ls.set("kasa.entries", rows);
+    }
+    return rows;
+  },
+  async insert(e){ const rows = await local.list(); const row = {id:uid(), created_at:new Date().toISOString(), ...e};
+                   rows.push(row); ls.set("kasa.entries", rows); return row; },
+  async patch(id,e){ const rows = await local.list(); const i = rows.findIndex(r=>r.id===id);
+                     if (i>=0) rows[i] = {...rows[i], ...e}; ls.set("kasa.entries", rows); },
+  async remove(id){ const rows = await local.list(); ls.set("kasa.entries", rows.filter(r=>r.id!==id)); }
+};
+const store = CLOUD ? cloud : local;
+
+/* ---------- state ---------- */
+let entries = [], tab = "debts", me = ls.get("kasa.me", null);
+let form = null;
+
+/* ---------- math: попарні борги ---------- */
+function debts(list){
+  const owe = {}; PEOPLE.forEach(a => { owe[a] = {}; PEOPLE.forEach(b => { if (a!==b) owe[a][b] = 0; }); });
+  list.forEach(e => {
+    const v = uah(e);
+    if (e.kind === "transfer"){
+      if (owe[e.payer] && e.recipient && owe[e.payer][e.recipient] !== undefined) owe[e.payer][e.recipient] -= v;
+    } else {
+      const sp = (e.split || []).filter(p => PEOPLE.includes(p));
+      if (!sp.length || !owe[e.payer]) return;
+      sp.forEach(p => { if (p !== e.payer) owe[p][e.payer] += v / sp.length; });
+    }
+  });
+  const net = {}; PEOPLE.forEach(a => { net[a] = {}; });
+  PEOPLE.forEach(a => PEOPLE.forEach(b => {
+    if (a === b) return;
+    const d = owe[a][b] - owe[b][a];
+    net[a][b] = d > 0.5 ? d : 0;
+  }));
+  return net;
+}
+
+/* ---------- render ---------- */
+function render(){
+  const paid = entries.filter(e => !e.planned);
+  const netNow = debts(paid), netAll = debts(entries);
+  const sum = n => PEOPLE.reduce((s,a) => s + PEOPLE.reduce((t,b) => t + (a!==b ? n[a][b] : 0), 0), 0);
+  const spent = paid.filter(e => e.kind === "expense").reduce((s,e) => s + uah(e), 0);
+  const plan  = entries.filter(e => e.planned).reduce((s,e) => s + uah(e), 0);
+
+  document.getElementById("summary").innerHTML = `
+    <div><div class="eyebrow">Кошторис</div><div class="v">${fmt(spent)}</div></div>
+    <div><div class="eyebrow">Непогашено</div><div class="v red">${fmt(sum(netNow))}</div></div>
+    <div><div class="eyebrow">Попереду</div><div class="v">${fmt(plan)}</div></div>`;
+
+  const order = PEOPLE.slice().sort((a,b) => {
+    const f = x => PEOPLE.reduce((s,y) => s + (x!==y ? netNow[y][x] - netNow[x][y] : 0), 0);
+    return f(b) - f(a);
+  });
+  document.getElementById("accounts").innerHTML = order.map(a => {
+    const out = PEOPLE.filter(b => b!==a && netNow[a][b] > 0.5);
+    const inc = PEOPLE.filter(b => b!==a && netNow[b][a] > 0.5);
+    const o = out.reduce((s,b) => s + netNow[a][b], 0), i = inc.reduce((s,b) => s + netNow[b][a], 0);
+    const cls = o > 0.5 ? "owing" : (i > 0.5 ? "creditor" : "");
+    const verdict = o > 0.5 ? `<span class="verdict r">винен ${fmt(o)}</span>`
+                  : i > 0.5 ? `<span class="verdict g">має отримати ${fmt(i)}</span>`
+                            : `<span class="verdict n">розрахувався</span>`;
+    const planExtra = (() => {
+      const po = PEOPLE.reduce((s,b) => s + (a!==b ? netAll[a][b] : 0), 0);
+      const d = po - o;
+      return d > 0.5 ? `<li class="none">з урахуванням плану винен ${fmt(po)}</li>` : "";
+    })();
+    let rows = out.map(b => `<li class="debit"><span>Заборгованість перед <b>${b}</b></span><span class="amt">${fmt(netNow[a][b])}</span></li>`)
+      .concat(inc.map(b => `<li class="credit"><span>Має отримати від <b>${b}</b></span><span class="amt">${fmt(netNow[b][a])}</span></li>`));
+    if (!rows.length) rows = [`<li class="none">Ні винен, ні йому винні</li>`];
+    return `<div class="acct ${cls}"><div class="acct-top"><span class="nm">${a}${a===me?" ·":""}</span>${verdict}</div>
+      <ul class="pairs">${rows.join("")}${planExtra}</ul></div>`;
+  }).join("");
+
+  const groups = [
+    ["Витрати",     entries.filter(e => e.kind === "expense" && !e.planned)],
+    ["Перекази",    entries.filter(e => e.kind === "transfer")],
+    ["Заплановано", entries.filter(e => e.planned)]
+  ];
+  document.getElementById("log").innerHTML = groups.map(([name, list]) => {
+    if (!list.length) return "";
+    const total = list.reduce((s,e) => s + uah(e), 0);
+    const rows = list.slice().reverse().map(e => {
+      const tr = e.kind === "transfer";
+      const cls = "ent" + (tr ? " is-tr" : "") + (e.planned ? " is-plan" : "");
+      const ic  = tr ? "→" : (e.planned ? "◦" : "₴");
+      const t   = tr ? `${e.payer} → ${e.recipient}` : (e.title || "Без назви");
+      const m   = tr ? "переказ" :
+        `${e.payer} · ${(e.split||[]).length === PEOPLE.length ? "на всіх" : (e.split||[]).join(", ")}`;
+      return `<button class="${cls}" data-id="${e.id}">
+        <span class="ic">${ic}</span>
+        <span class="body"><span class="t">${t}</span><span class="m">${m}</span></span>
+        <span class="a">${fmtE(e)}</span></button>`;
+    }).join("");
+    return `<div class="group-h"><h2>${name}</h2><span>${fmt(total)}</span></div>${rows}`;
+  }).join("") || (CLOUD
+    ? `<div class="empty">База порожня.<br><br>
+        <button type="button" id="do-seed" class="chip" style="min-height:44px;padding:10px 18px">
+          Залити 15 початкових записів</button><br>
+        <span style="font-size:11.5px">квитки, готель, гарантія за кемпер, усі перекази і плани</span></div>`
+    : `<div class="empty">Записів ще немає. Тисни «+ Витрата» внизу.</div>`);
+
+  document.getElementById("rate-note").textContent = "курс " + RATE.toFixed(2).replace(".",",") + " грн/€";
+  document.getElementById("count-note").textContent = entries.length + " записів";
+  document.getElementById("view-debts").hidden = tab !== "debts";
+  document.getElementById("view-log").hidden   = tab !== "log";
+  document.getElementById("tab-debts").setAttribute("aria-selected", tab === "debts");
+  document.getElementById("tab-log").setAttribute("aria-selected", tab === "log");
+}
+
+function setStatus(kind, text){
+  const el = document.getElementById("status");
+  el.className = "status " + kind; el.textContent = text;
+}
+
+async function load(){
+  try {
+    entries = await store.list();
+    if (CLOUD) { ls.set("kasa.cache", entries); setStatus("cloud", "спільна база"); }
+    else setStatus("local", "локально — тільки цей телефон");
+  } catch (err) {
+    entries = ls.get("kasa.cache", entries);
+    setStatus("err", "немає звʼязку з базою");
+  }
+  render();
+}
+
+/* ---------- chips ---------- */
+function chips(host, opts, selected, onPick, multi){
+  host.innerHTML = opts.map(o =>
+    `<button type="button" class="chip" data-v="${o}" aria-pressed="${selected.includes(o)}">${o}</button>`).join("");
+  host.querySelectorAll(".chip").forEach(b => b.addEventListener("click", () => {
+    const v = b.dataset.v;
+    if (multi) { const i = selected.indexOf(v); i >= 0 ? selected.splice(i,1) : selected.push(v); }
+    else { selected.length = 0; selected.push(v); }
+    host.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", selected.includes(x.dataset.v)));
+    onPick && onPick();
+  }));
+}
+
+/* ---------- modal ---------- */
+const $ = id => document.getElementById(id);
+function openForm(kind, entry){
+  form = entry
+    ? {id:entry.id, kind:entry.kind, title:entry.title||"", currency:entry.currency,
+       amount:String(entry.amount), payer:[entry.payer], recipient:[entry.recipient].filter(Boolean),
+       split:(entry.split||[]).slice(), planned:!!entry.planned}
+    : {id:null, kind, title:"", currency:"UAH", amount:"",
+       payer:[me || PEOPLE[0]], recipient:[], split:kind==="expense" ? PEOPLE.slice() : [], planned:false};
+
+  const tr = form.kind === "transfer";
+  $("m-title").textContent = entry ? (tr ? "Переказ" : "Витрата") : (tr ? "Новий переказ" : "Нова витрата");
+  $("fld-title").hidden = tr; $("fld-payer").hidden = tr;
+  $("fld-split").hidden = tr; $("fld-plan").hidden  = tr;
+  $("fld-tr").hidden = !tr;
+  $("m-del").hidden = !entry;
+
+  $("f-amt").value = form.amount; $("f-title").value = form.title;
+  $("f-uah").setAttribute("aria-pressed", form.currency === "UAH");
+  $("f-eur").setAttribute("aria-pressed", form.currency === "EUR");
+  $("f-planned").setAttribute("aria-pressed", form.planned);
+  $("f-err").textContent = "";
+
+  chips($("quick"), QUICK, [], null, false);
+  $("quick").querySelectorAll(".chip").forEach(b => { b.classList.add("tiny");
+    b.addEventListener("click", () => { $("f-title").value = b.dataset.v; form.title = b.dataset.v; }); });
+  chips($("f-payer"), PEOPLE, form.payer, null, false);
+  chips($("f-from"),  PEOPLE, form.payer, null, false);
+  chips($("f-to"),    PEOPLE, form.recipient, null, false);
+  chips($("f-split"), PEOPLE, form.split, perHead, true);
+  perHead();
+
+  $("mask").hidden = false;
+  if (!entry) setTimeout(() => $("f-amt").focus(), 60);
+}
+function perHead(){
+  const n = form && form.split.length, a = parseFloat(($("f-amt").value || "0").replace(",","."));
+  $("per-head").textContent = (n && a) ? "по " + (a/n).toFixed(a/n < 100 ? 1 : 0) +
+    (form.currency === "EUR" ? " €" : " грн") + " з особи" : (n ? n + " ос." : "нікого не обрано");
+}
+function closeForm(){ $("mask").hidden = true; form = null; }
+
+async function save(){
+  const a = parseFloat(($("f-amt").value || "").replace(",","."));
+  if (!a || a <= 0) return ($("f-err").textContent = "Впиши суму.");
+  const tr = form.kind === "transfer";
+  const payer = tr ? form.payer[0] : form.payer[0];
+  if (!payer) return ($("f-err").textContent = "Обери, хто заплатив.");
+  if (tr && !form.recipient[0]) return ($("f-err").textContent = "Обери, кому переказ.");
+  if (tr && form.recipient[0] === payer) return ($("f-err").textContent = "Це та сама людина.");
+  if (!tr && !form.split.length) return ($("f-err").textContent = "Обери, на кого ділиться.");
+
+  const row = {
+    kind: form.kind, amount: a, currency: form.currency,
+    title: tr ? null : ($("f-title").value.trim() || "Без назви"),
+    payer, recipient: tr ? form.recipient[0] : null,
+    split: tr ? [] : form.split.slice(), planned: tr ? false : form.planned
+  };
+  $("m-save").disabled = true;
+  try {
+    if (form.id) { await store.patch(form.id, row); const i = entries.findIndex(e => e.id === form.id);
+                   if (i >= 0) entries[i] = {...entries[i], ...row}; }
+    else { const created = await store.insert(row); entries.push(created); }
+    closeForm(); render();
+  } catch (err) { $("f-err").textContent = "Не вдалося зберегти: " + err.message; }
+  $("m-save").disabled = false;
+}
+async function del(){
+  if (!form || !form.id) return;
+  $("m-del").disabled = true;
+  try { await store.remove(form.id); entries = entries.filter(e => e.id !== form.id); closeForm(); render(); }
+  catch (err) { $("f-err").textContent = "Не вдалося видалити: " + err.message; }
+  $("m-del").disabled = false;
+}
+
+/* ---------- wiring ---------- */
+$("me").innerHTML = `<option value="">—</option>` + PEOPLE.map(p => `<option${p===me?" selected":""}>${p}</option>`).join("");
+$("me").addEventListener("change", e => { me = e.target.value || null; ls.set("kasa.me", me); render(); });
+$("tab-debts").addEventListener("click", () => { tab = "debts"; render(); });
+$("tab-log").addEventListener("click",   () => { tab = "log";   render(); });
+$("add-exp").addEventListener("click", () => openForm("expense"));
+$("add-tr").addEventListener("click",  () => openForm("transfer"));
+$("m-cancel").addEventListener("click", closeForm);
+$("m-save").addEventListener("click", save);
+$("m-del").addEventListener("click", del);
+$("mask").addEventListener("click", e => { if (e.target.id === "mask") closeForm(); });
+$("f-uah").addEventListener("click", () => { form.currency = "UAH";
+  $("f-uah").setAttribute("aria-pressed","true"); $("f-eur").setAttribute("aria-pressed","false"); perHead(); });
+$("f-eur").addEventListener("click", () => { form.currency = "EUR";
+  $("f-eur").setAttribute("aria-pressed","true"); $("f-uah").setAttribute("aria-pressed","false"); perHead(); });
+$("f-amt").addEventListener("input", perHead);
+$("f-planned").addEventListener("click", () => { form.planned = !form.planned;
+  $("f-planned").setAttribute("aria-pressed", form.planned); });
+$("split-all").addEventListener("click", () => { form.split.length = 0; PEOPLE.forEach(p => form.split.push(p));
+  chips($("f-split"), PEOPLE, form.split, perHead, true); perHead(); });
+$("split-none").addEventListener("click", () => { form.split.length = 0;
+  chips($("f-split"), PEOPLE, form.split, perHead, true); perHead(); });
+document.getElementById("log").addEventListener("click", async e => {
+  if (e.target.id === "do-seed"){
+    e.target.disabled = true; e.target.textContent = "Заливаю…";
+    try { entries = await cloud.seed(); render(); }
+    catch (err) { e.target.textContent = "Не вийшло: " + err.message; e.target.disabled = false; }
+    return;
+  }
+  const b = e.target.closest(".ent"); if (!b) return;
+  const en = entries.find(x => String(x.id) === b.dataset.id); if (en) openForm(en.kind, en);
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("mask").hidden) closeForm(); });
+if (CLOUD){
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) load(); });
+  setInterval(() => { if (!document.hidden && $("mask").hidden) load(); }, 20000);
+}
+load();
+</script>
