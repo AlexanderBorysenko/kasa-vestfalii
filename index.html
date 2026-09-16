@@ -157,6 +157,9 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
   border:1px solid var(--ink);background:var(--ink);color:var(--paper)}
 .mrow button.ghost{background:transparent;color:var(--ink-2);border-color:var(--rule-hard);font-weight:400}
 .mrow button.danger{background:transparent;color:var(--red);border-color:var(--red);flex:0 0 auto;padding:0 16px}
+.mrow button:disabled{opacity:.4;cursor:default}
+.mrow button.busy{opacity:1;cursor:progress}
+.mrow button.danger.confirm{background:var(--red);color:var(--paper);border-color:var(--red);font-weight:600}
 .err{color:var(--red);font-size:12.5px;margin-top:8px;min-height:1em}
 .hintline{font-size:11.5px;color:var(--ink-3);margin-top:5px}
 .foot{padding:22px 2px 8px;font-size:11px;color:var(--ink-3);
@@ -503,6 +506,7 @@ function chips(host, opts, selected, onPick, multi){
 /* ---------- modal ---------- */
 const $ = id => document.getElementById(id);
 function openForm(kind, entry){
+  if (busy) return;
   form = entry
     ? {id:entry.id, kind:entry.kind, title:entry.title||"", currency:entry.currency,
        amount:String(entry.amount), payer:[entry.payer], recipient:[entry.recipient].filter(Boolean),
@@ -531,6 +535,7 @@ function openForm(kind, entry){
   chips($("f-split"), PEOPLE, form.split, perHead, true);
   perHead();
 
+  armDelete(false); setBusy(false);
   $("mask").hidden = false;
   if (!entry) setTimeout(() => $("f-amt").focus(), 60);
 }
@@ -542,39 +547,77 @@ function perHead(){
       + (form.currency === "UAH" ? "" : " · " + Math.round(per * RATES[form.currency]) + " грн")
     : (n ? n + " ос." : "нікого не обрано");
 }
-function closeForm(){ $("mask").hidden = true; form = null; }
+function closeForm(){ if (busy) return; $("mask").hidden = true; form = null; armDelete(false); }
+
+let busy = false, delArmed = false;
+
+function setBusy(on, what){
+  busy = on;
+  const sv = $("m-save"), cn = $("m-cancel"), dl = $("m-del");
+  sv.disabled = cn.disabled = dl.disabled = on;
+  sv.classList.toggle("busy", on && what === "save");
+  dl.classList.toggle("busy", on && what === "del");
+  sv.textContent = (on && what === "save") ? "Зберігаю…" : "Зберегти";
+  dl.textContent = (on && what === "del") ? "Видаляю…" : (delArmed ? "Точно видалити?" : "Видалити");
+  $("mask").setAttribute("aria-busy", on ? "true" : "false");
+}
+function armDelete(on){
+  delArmed = on;
+  const dl = $("m-del");
+  dl.classList.toggle("confirm", on);
+  dl.textContent = on ? "Точно видалити?" : "Видалити";
+}
 
 async function save(){
+  if (busy) return;                      // друге натискання не проходить
+  const f = form; if (!f) return;        // працюємо зі знімком форми, а не з живим станом
+
   const a = parseFloat(($("f-amt").value || "").replace(",","."));
   if (!a || a <= 0) return ($("f-err").textContent = "Впиши суму.");
-  const tr = form.kind === "transfer";
-  const payer = tr ? form.payer[0] : form.payer[0];
+  const tr = f.kind === "transfer";
+  const payer = f.payer[0];
   if (!payer) return ($("f-err").textContent = "Обери, хто заплатив.");
-  if (tr && !form.recipient[0]) return ($("f-err").textContent = "Обери, кому переказ.");
-  if (tr && form.recipient[0] === payer) return ($("f-err").textContent = "Це та сама людина.");
-  if (!tr && !form.split.length) return ($("f-err").textContent = "Обери, на кого ділиться.");
+  if (tr && !f.recipient[0]) return ($("f-err").textContent = "Обери, кому переказ.");
+  if (tr && f.recipient[0] === payer) return ($("f-err").textContent = "Це та сама людина.");
+  if (!tr && !f.split.length) return ($("f-err").textContent = "Обери, на кого ділиться.");
 
   const row = {
-    kind: form.kind, amount: a, currency: form.currency,
+    kind: f.kind, amount: a, currency: f.currency,
     title: tr ? null : ($("f-title").value.trim() || "Без назви"),
-    payer, recipient: tr ? form.recipient[0] : null,
-    split: tr ? [] : form.split.slice(), planned: tr ? false : form.planned
+    payer, recipient: tr ? f.recipient[0] : null,
+    split: tr ? [] : f.split.slice(), planned: tr ? false : f.planned
   };
-  $("m-save").disabled = true;
+
+  $("f-err").textContent = "";
+  setBusy(true, "save");
   try {
-    if (form.id) { await store.patch(form.id, row); const i = entries.findIndex(e => e.id === form.id);
-                   if (i >= 0) entries[i] = {...entries[i], ...row}; }
-    else { const created = await store.insert(row); entries.push(created); }
-    closeForm(); render();
-  } catch (err) { $("f-err").textContent = "Не вдалося зберегти: " + err.message; }
-  $("m-save").disabled = false;
+    if (f.id){
+      await store.patch(f.id, row);
+      const i = entries.findIndex(e => e.id === f.id);
+      if (i >= 0) entries[i] = {...entries[i], ...row};
+    } else {
+      entries.push(await store.insert(row));
+    }
+    setBusy(false); closeForm(); render();
+  } catch (err) {
+    setBusy(false);
+    $("f-err").textContent = "Не вдалося зберегти: " + err.message + ". Спробуй ще раз.";
+  }
 }
+
 async function del(){
-  if (!form || !form.id) return;
-  $("m-del").disabled = true;
-  try { await store.remove(form.id); entries = entries.filter(e => e.id !== form.id); closeForm(); render(); }
-  catch (err) { $("f-err").textContent = "Не вдалося видалити: " + err.message; }
-  $("m-del").disabled = false;
+  if (busy) return;
+  const f = form; if (!f || !f.id) return;
+  if (!delArmed) { armDelete(true); return; }   // перший тап — підтвердження, другий — видалення
+  setBusy(true, "del");
+  try {
+    await store.remove(f.id);
+    entries = entries.filter(e => e.id !== f.id);
+    setBusy(false); closeForm(); render();
+  } catch (err) {
+    setBusy(false);
+    $("f-err").textContent = "Не вдалося видалити: " + err.message;
+  }
 }
 
 /* ---------- wiring ---------- */
@@ -588,6 +631,10 @@ $("m-cancel").addEventListener("click", closeForm);
 $("m-save").addEventListener("click", save);
 $("m-del").addEventListener("click", del);
 $("mask").addEventListener("click", e => { if (e.target.id === "mask") closeForm(); });
+$("mask").addEventListener("click", e => {
+  if (delArmed && e.target.id !== "m-del") armDelete(false);
+}, true);
+$("mask").addEventListener("input", () => { if (delArmed) armDelete(false); });
 $("f-cur").addEventListener("change", e => { form.currency = e.target.value; perHead(); });
 $("f-amt").addEventListener("input", perHead);
 $("f-planned").addEventListener("click", () => { form.planned = !form.planned;
@@ -608,8 +655,8 @@ document.getElementById("log").addEventListener("click", async e => {
 });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("mask").hidden) closeForm(); });
 if (CLOUD){
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) load(); });
-  setInterval(() => { if (!document.hidden && $("mask").hidden) load(); }, 20000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && !busy) load(); });
+  setInterval(() => { if (!document.hidden && $("mask").hidden && !busy) load(); }, 20000);
 }
 load();
 </script>
