@@ -137,11 +137,9 @@ h1{font-family:Bitter,Georgia,serif;font-size:24px;font-weight:700;margin:4px 0 
 .amt-row input{flex:1;min-width:0;font-family:"IBM Plex Mono",monospace;font-size:26px;font-weight:600;
   padding:10px 12px;border:1px solid var(--rule-hard);border-radius:4px;background:var(--sheet);
   min-height:54px}
-.cur{display:flex;border:1px solid var(--rule-hard);border-radius:4px;overflow:hidden;background:var(--sheet)}
-.cur button{width:52px;background:transparent;border:0;cursor:pointer;font-family:"IBM Plex Mono",monospace;
-  font-size:15px;color:var(--ink-3)}
-.cur button+button{border-left:1px solid var(--rule)}
-.cur button[aria-pressed="true"]{background:var(--ink);color:var(--paper);font-weight:600}
+.cur{flex:none;min-width:104px;border:1px solid var(--rule-hard);border-radius:4px;background:var(--sheet);
+  padding:0 10px;min-height:54px;font-family:"IBM Plex Mono",monospace;font-size:15px;font-weight:600;
+  cursor:pointer;color:var(--ink)}
 input[type=text]{width:100%;padding:11px 12px;border:1px solid var(--rule-hard);border-radius:4px;
   background:var(--sheet);min-height:46px}
 input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--green);outline-offset:1px}
@@ -217,10 +215,11 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
       <label class="eyebrow">Сума</label>
       <div class="amt-row">
         <input id="f-amt" type="text" inputmode="decimal" placeholder="0" autocomplete="off">
-        <div class="cur">
-          <button type="button" id="f-uah" aria-pressed="true">грн</button>
-          <button type="button" id="f-eur" aria-pressed="false">€</button>
-        </div>
+        <select id="f-cur" class="cur" aria-label="Валюта">
+          <option value="UAH">грн</option>
+          <option value="EUR">€ євро</option>
+          <option value="ALL">L лек</option>
+        </select>
       </div>
     </div>
 
@@ -282,7 +281,10 @@ const SUPABASE_URL  = "https://vluflyggmmhdczqygbxh.supabase.co";
 const SUPABASE_ANON = "sb_publishable_O6OWIJe0kE9g05XUw3kA8Q_Bcj3O98z";
 
 const PEOPLE = ["Боря","Олеся","Настя","Джулі","Ліза"];
-const RATE   = 51.8;
+const EUR_UAH = 51.8;      // з факту 100 € = 5 180 грн
+const EUR_ALL = 91.67;     // курс на 16.09.2026
+const RATES   = { UAH: 1, EUR: EUR_UAH, ALL: EUR_UAH / EUR_ALL };
+const SIGN    = { UAH: "грн", EUR: "€", ALL: "L" };
 const QUICK  = ["Пальне","Продукти","Вечеря","Кемпінг","Паркінг","Пором","Вода/лід","Інше"];
 
 const SEED = [
@@ -305,11 +307,10 @@ const SEED = [
 
 const CLOUD = !SUPABASE_URL.startsWith("__");
 const SEED_AT = Date.parse("2026-09-09T12:00:00Z");
-const uah = e => e.currency === "EUR" ? e.amount * RATE : e.amount;
+const uah = e => e.amount * (RATES[e.currency] || 1);
 const fmt = v => Math.round(v).toLocaleString("uk-UA").replace(/ /g," ") + " грн";
-const fmtE = e => e.currency === "EUR"
-  ? e.amount.toLocaleString("uk-UA",{maximumFractionDigits:2}) + " €"
-  : fmt(e.amount);
+const fmtE = e => e.currency === "UAH" ? fmt(e.amount)
+  : e.amount.toLocaleString("uk-UA",{maximumFractionDigits:2}) + " " + SIGN[e.currency];
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,8);
 const ls = {
   get(k,d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(_){ return d; } },
@@ -460,7 +461,8 @@ function render(){
         <span style="font-size:11.5px">квитки, готель, гарантія за кемпер, усі перекази і плани</span></div>`
     : `<div class="empty">Записів ще немає. Тисни «+ Витрата» внизу.</div>`);
 
-  document.getElementById("rate-note").textContent = "курс " + RATE.toFixed(2).replace(".",",") + " грн/€";
+  document.getElementById("rate-note").textContent =
+    "1 € = " + EUR_UAH.toFixed(2).replace(".",",") + " грн = " + EUR_ALL.toFixed(0) + " лек";
   document.getElementById("count-note").textContent = entries.length + " записів";
   document.getElementById("view-debts").hidden = tab !== "debts";
   document.getElementById("view-log").hidden   = tab !== "log";
@@ -516,8 +518,7 @@ function openForm(kind, entry){
   $("m-del").hidden = !entry;
 
   $("f-amt").value = form.amount; $("f-title").value = form.title;
-  $("f-uah").setAttribute("aria-pressed", form.currency === "UAH");
-  $("f-eur").setAttribute("aria-pressed", form.currency === "EUR");
+  $("f-cur").value = form.currency;
   $("f-planned").setAttribute("aria-pressed", form.planned);
   $("f-err").textContent = "";
 
@@ -535,8 +536,11 @@ function openForm(kind, entry){
 }
 function perHead(){
   const n = form && form.split.length, a = parseFloat(($("f-amt").value || "0").replace(",","."));
-  $("per-head").textContent = (n && a) ? "по " + (a/n).toFixed(a/n < 100 ? 1 : 0) +
-    (form.currency === "EUR" ? " €" : " грн") + " з особи" : (n ? n + " ос." : "нікого не обрано");
+  const per = n ? a/n : 0;
+  $("per-head").textContent = (n && a)
+    ? "по " + per.toFixed(per < 100 ? 1 : 0) + " " + SIGN[form.currency] + " з особи"
+      + (form.currency === "UAH" ? "" : " · " + Math.round(per * RATES[form.currency]) + " грн")
+    : (n ? n + " ос." : "нікого не обрано");
 }
 function closeForm(){ $("mask").hidden = true; form = null; }
 
@@ -584,10 +588,7 @@ $("m-cancel").addEventListener("click", closeForm);
 $("m-save").addEventListener("click", save);
 $("m-del").addEventListener("click", del);
 $("mask").addEventListener("click", e => { if (e.target.id === "mask") closeForm(); });
-$("f-uah").addEventListener("click", () => { form.currency = "UAH";
-  $("f-uah").setAttribute("aria-pressed","true"); $("f-eur").setAttribute("aria-pressed","false"); perHead(); });
-$("f-eur").addEventListener("click", () => { form.currency = "EUR";
-  $("f-eur").setAttribute("aria-pressed","true"); $("f-uah").setAttribute("aria-pressed","false"); perHead(); });
+$("f-cur").addEventListener("change", e => { form.currency = e.target.value; perHead(); });
 $("f-amt").addEventListener("input", perHead);
 $("f-planned").addEventListener("click", () => { form.planned = !form.planned;
   $("f-planned").setAttribute("aria-pressed", form.planned); });
